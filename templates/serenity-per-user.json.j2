@@ -1,0 +1,86 @@
+{
+  "outbounds": [
+    {% for host in groups.vps %}
+      {% set country_flag = hostvars[host].country_flag %}
+      {
+        "type": "shadowsocks",
+        "tag": "{{ country_flag }} SS2022 {{ item.name }}",
+        "server": "{{ host }}",
+        "server_port": 8080,
+        "method": "2022-blake3-aes-128-gcm",
+        "password": "{{ server_password }}:{{ item.password }}",
+        "multiplex": {
+          "enabled": true
+        }
+      },
+      {
+        "type": "trojan",
+        "tag": "{{ country_flag }} Trojan {{ item.name }}",
+        "server": "{{ host }}",
+        "server_port": 8081,
+        "password": "{{ item.password }}",
+        "tls": {
+          "enabled": true,
+          "server_name": "{{ host }}",
+          "utls": {
+            "enabled": true,
+            "fingerprint": "firefox"
+          }
+        },
+        "multiplex": {
+          "enabled": true
+        }
+      },
+      {
+        "type": "hysteria2",
+        "tag": "{{ country_flag }} Hysteria2 {{ item.name }}",
+        "server": "{{ host }}",
+        "server_port": 8082,
+        "up_mbps": 1000,
+        "down_mbps": 1000,
+        "password": "{{ item.password }}",
+        "tls": {
+          "enabled": true,
+          "server_name": "{{ host }}"
+        }
+      }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ],
+  "subscriptions": [
+    {
+      "name": "{{ item.name }}",
+      "url": "https://{{ item.name }}:{{ item.password }}@sub.fayash.me/{{ item.name }}"
+    }
+  ],
+  "profiles": [
+    {
+      "name": "{{ item.name }}",
+      "template": "default",
+      "outbound": [
+        {% for host in groups.vps %}
+          {% set country_flag = hostvars[host].country_flag %}
+          "{{ country_flag }} SS2022 {{ item.name }}",
+          "{{ country_flag }} Trojan {{ item.name }}",
+          "{{ country_flag }} Hysteria2 {{ item.name }}"{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ]
+    },
+    {
+      "name": "{{ item.name }}-default",
+      "template": "default",
+      "subscription": [
+        "{{ item.name }}"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "name": "{{ item.name }}",
+      "password": "{{ item.password }}",
+      "profile": [
+        "{{ item.name }}-default",
+        "{{ item.name }}"
+      ]
+    }
+  ]
+}

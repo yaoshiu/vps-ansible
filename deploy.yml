@@ -1,0 +1,112 @@
+- name: Deploy
+  hosts: vps
+  become: true
+  vars_files:
+    - vars/secrets.yml
+
+  tasks:
+    - name: Install Docker
+      block: 
+        - name: Install prequisites
+          apt:
+            name:
+              - ca-certificates
+              - curl
+              - gpg
+            state: present
+            update_cache: true
+
+        - name: Add Docker GPG key
+          apt_key:
+            url: https://download.docker.com/linux/debian/gpg
+            state: present
+
+        - name: Add Docker repository
+          apt_repository:
+            repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+            state: present
+
+        - name: Install Docker
+          apt:
+            name: 
+              - docker-ce
+              - docker-ce-cli
+              - containerd.io
+              - docker-buildx-plugin
+              - docker-compose-plugin
+            state: present
+            update_cache: true
+
+    - name: Enable BBR
+      block:
+        - name: Load tcp_bbr module
+          modprobe:
+            name: tcp_bbr
+
+        - name: Load tcp_bbr module on boot
+          copy:
+            dest: /etc/modules-load.d/tcp_bbr.conf
+            content: "tcp_bbr\n"
+            owner: root
+            group: root
+            mode: "0644"
+
+        - name: Enable BBR
+          sysctl:
+            name: "{{ item.name }}"
+            value: "{{ item.value }}"
+            state: present
+          loop:
+            - name: net.core.default_qdisc
+              value: fq
+            - name: net.ipv4.tcp_congestion_control
+              value: bbr
+
+    - name: Enable TFO
+      sysctl:
+        name: net.ipv4.tcp_fastopen
+        value: 3
+        state: present
+        reload: true
+
+    - name: Upload files
+      block:
+        - name: Install rsync
+          apt:
+            name: rsync
+            state: present
+            update_cache: true
+
+        - name: Upload files
+          synchronize:
+            src: ./docker-compose/
+            dest: /opt/docker-compose/
+            rsync_opts:
+              - "--compress"
+              - "--delete"
+
+    - name: Templating
+      template:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+      loop:
+        - src: templates/docker-compose.yml.j2
+          dest: /opt/docker-compose/docker-compose.yml
+        - src: templates/Caddyfile.j2
+          dest: /opt/docker-compose/caddy/Caddyfile
+        - src: templates/sing-box.json.j2
+          dest: /opt/docker-compose/sing-box/config.json
+
+    - name: Generate serenity config
+      template:
+        src: templates/serenity-per-user.json.j2
+        dest: /opt/docker-compose/serenity/{{ item.name }}.json
+      loop: "{{ users }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Start Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: /opt/docker-compose/
+        recreate: always
+

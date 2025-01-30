@@ -1,0 +1,27 @@
+{
+  log {
+    format console
+  }
+
+  email yongyuanxihuanchenxi@gmail.com
+}
+
+{% if main | default(false) %}
+sub.fayash.me {
+  reverse_proxy serenity
+}
+
+dns.fayash.me {
+  handle /dns-query* {
+    reverse_proxy https://adguardhome {
+      transport http {
+        tls_server_name {host}  
+      }
+    }
+  }
+  reverse_proxy adguardhome
+}
+{% endif %}
+
+{{ inventory_hostname }} {
+}

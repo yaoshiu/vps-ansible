@@ -1,0 +1,7 @@
+vps:
+  hosts:
+    bagevm.fayash.me:
+      country_flag: 🇺🇸
+    zgo-osaka.fayash.me:
+      main: true
+      country_flag: 🇯🇵

@@ -1,0 +1,57 @@
+services:
+  sing-box:
+    image: ghcr.io/sagernet/sing-box
+    container_name: sing-box
+    restart: always
+    volumes:
+      - ./sing-box:/etc/sing-box
+      - caddy_data:/caddy_data:ro
+    command: -D /var/lib/sing-box -C /etc/sing-box run
+    ports:
+      - 8080:8080
+      - 8081:8081
+      - 8082:8082/udp
+      - 20000-50000:8082/udp
+
+  caddy:
+    image: caddy:latest
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+      - 443:443/udp
+    volumes:
+      - ./caddy:/etc/caddy
+      - caddy_data:/data
+      - caddy_config:/config
+        
+{% if main | default(false) %}
+  serenity:
+    image: ghcr.io/sagernet/serenity
+    container_name: serenity
+    restart: always
+    volumes:
+      - ./serenity:/etc/serenity
+    command: -D /var/lib/serenity -C /etc/serenity run
+
+  adguardhome:
+    image: adguard/adguardhome
+    container_name: adguardhome
+    restart: unless-stopped
+    volumes:
+      - adguardhome_data:/opt/adguardhome
+      - caddy_data:/caddy_data:ro
+    ports:
+      - 3000:3000
+      - 853:853
+      - 853:853/udp
+      - 5443:5443
+      - 5443:5443/udp
+      - 6060:6060
+{% endif %}
+
+volumes:
+  caddy_data:
+  caddy_config:
+  adguardhome_data:
