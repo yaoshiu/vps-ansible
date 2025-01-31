@@ -90,12 +90,17 @@
         src: "{{ item.src }}"
         dest: "{{ item.dest }}"
       loop:
-        - src: templates/docker-compose.yml.j2
+        - name: Generate docker-compose
+          src: templates/docker-compose.yml.j2
           dest: /opt/docker-compose/docker-compose.yml
-        - src: templates/Caddyfile.j2
+        - name: Generate Caddyfile
+          src: templates/Caddyfile.j2
           dest: /opt/docker-compose/caddy/Caddyfile
-        - src: templates/sing-box.json.j2
+        - name: Generate sing-box config
+          src: templates/sing-box.json.j2
           dest: /opt/docker-compose/sing-box/config.json
+      loop_control:
+        label: "{{ item.name }}"
 
     - name: Generate serenity config
       template:
@@ -104,9 +109,11 @@
       loop: "{{ users }}"
       loop_control:
         label: "{{ item.name }}"
+      when: main | default(false)
 
     - name: Start Docker Compose
       community.docker.docker_compose_v2:
         project_src: /opt/docker-compose/
         recreate: always
+        remove_orphans: true
 
