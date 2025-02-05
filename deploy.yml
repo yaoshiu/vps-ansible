@@ -42,14 +42,7 @@
         - name: Load tcp_bbr module
           modprobe:
             name: tcp_bbr
-
-        - name: Load tcp_bbr module on boot
-          copy:
-            dest: /etc/modules-load.d/tcp_bbr.conf
-            content: "tcp_bbr\n"
-            owner: root
-            group: root
-            mode: "0644"
+            persistent: present
 
         - name: Enable BBR
           sysctl:
