@@ -46,39 +46,47 @@
       "custom_rules": [
         {
           "rule_set": "geosite-category-ads-all",
-          "outbound": "reject"
+          "action": "reject"
         },
         {
           "rule_set": "geosite-private",
+          "action": "route",
           "outbound": "direct"
         },
         {
           "rule_set": "geosite-cn",
+          "action": "route",
           "outbound": "direct"
         },
         {
           "rule_set": "geoip-private",
+          "action": "route",
           "outbound": "direct"
         },
         {
           "rule_set": "geoip-cn",
+          "action": "route",
           "outbound": "direct"
         },
         {
-          "rule_set": "geosite-geolocation-!cn",
-          "outbound": "🚀Default"
-        },
-        {
           "rule_set": "geosite-apple",
+          "action": "route",
           "outbound": "direct"
         },
         {
           "rule_set": "geosite-microsoft",
+          "action": "route",
           "outbound": "direct"
         },
         {
           "rule_set": "geosite-openai",
+          "action": "route",
           "outbound": "🤖OpenAI"
+        },
+        {
+          "rule_set": "geosite-geolocation-!cn",
+          "action": "route",
+          "outbound": "🚀Default"
         }
       ]
     }
