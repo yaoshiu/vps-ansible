@@ -5,6 +5,7 @@
       "name": "default",
       "dns": "tls://8.8.8.8",
       "dns_local": "tls://223.5.5.5",
+      "enable_fakeip": true,
       "auto_redirect": true,
       "enable_jsdelivr": true,
       "extra_groups": [
@@ -37,10 +38,7 @@
           "repository": "MetaCubeX/meta-rules-dat",
           "path": "sing/geo/geoip/",
           "prefix": "geoip-",
-          "rule_set": [
-            "cn",
-            "private"
-          ]
+          "rule_set": ["cn", "private"]
         }
       ],
       "custom_rules": [

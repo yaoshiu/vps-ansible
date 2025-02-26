@@ -28,7 +28,9 @@ services:
         
 {% if main | default(false) %}
   serenity:
-    image: ghcr.io/sagernet/serenity
+    build:
+      context: https://github.com/Sagernet/serenity.git
+      dockerfile: Dockerfile
     container_name: serenity
     restart: always
     volumes:
