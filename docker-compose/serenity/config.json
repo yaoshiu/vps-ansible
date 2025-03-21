@@ -24,6 +24,7 @@
           "prefix": "geosite-",
           "rule_set": [
             "category-ads-all",
+            "github",
             "microsoft",
             "openai",
             "apple",
@@ -70,6 +71,11 @@
           "rule_set": "geosite-apple",
           "action": "route",
           "outbound": "direct"
+        },
+        {
+          "rule_set": "geosite-github",
+          "action": "route",
+          "outbound": "🚀Default"
         },
         {
           "rule_set": "geosite-microsoft",
