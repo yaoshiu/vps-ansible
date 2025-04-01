@@ -118,3 +118,12 @@
         recreate: always
         remove_orphans: true
 
+    - name: Port Redirect
+      iptables:
+        table: nat
+        chain: PREROUTING
+        in_interface: eth0
+        protocol: udp
+        destination_port: 20000:50000
+        jump: REDIRECT
+        to_ports: 8082
