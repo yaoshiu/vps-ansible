@@ -13,8 +13,6 @@
       {
         devShell = pkgs.mkShell {
           packages = with pkgs; [
-            deno
-            nodejs
             ansible
             just
           ];
